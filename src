@@ -1,1 +1,8 @@
+# preprocessing
+import pandas as pd
+import numpy as np
 
+data = pd.read_csv(filepath,encoding='GBK')
+new_data = data[['INNET_MONTH','CREDIT_LEVEL',\
+                 'ACCT_FEE','CALL_DURA']].iloc[0:30000,:]
+new_data.describe()

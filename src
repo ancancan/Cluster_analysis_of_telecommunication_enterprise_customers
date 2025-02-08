@@ -1,8 +1,43 @@
-# preprocessing
+# src/preprocessing
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
-data = pd.read_csv(filepath,encoding='GBK')
+data = pd.read_csv('USER_INFO_3.csv',encoding='GBK')
 new_data = data[['INNET_MONTH','CREDIT_LEVEL',\
                  'ACCT_FEE','CALL_DURA']].iloc[0:30000,:]
 new_data.describe()
+
+data2 = StandardScaler().fit_transform(new_data)
+np.savez('airline_scale.npz',data2)
+print('After standardization, the four attributes are：\n',data2[:4,:])
+
+
+# src/clustering
+from sklearn.cluster import KMeans
+airline_scale = np.load('airline_scale.npz')['arr_0']
+k = 4
+kmeans_model = KMeans(n_clusters = k,random_state=123)
+fit_kmeans = kmeans_model.fit(airline_scale)
+kmeans_cc = kmeans_model.cluster_centers_ 
+print('The cluster centers are：\n',kmeans_cc)
+kmeans_labels = kmeans_model.labels_ 
+print('The category label of each sample is：\n',kmeans_labels)
+r1 = pd.Series(kmeans_model.labels_).value_counts()  # Count the number of samples of different categories
+print('The final number of each category is：\n',r1)
+
+# src/Output_clustering_results
+cluster_center = pd.DataFrame(kmeans_model.cluster_centers_,\
+             columns = ['IN','CR','AC','CA'])   
+cluster_center.index = pd.DataFrame(kmeans_model.labels_ ).\
+                  drop_duplicates().iloc[:,0]  #Sample categories as data frame index
+# drop_duplicates removes duplicates. You can choose whether to keep duplicate values. The default is to keep duplicate values. If you do not want to keep duplicate values, just set the parameter keep to False
+print(cluster_center)
+cluster_center.to_excel('juler.xlsx')
+
+labels = ['IN','CR','AC','CA']
+legen = ['Customer Base' + str(i + 1) for i in cluster_center.index]  # Customer group naming, used as a legend for the radar chart
+lstype = ['-','--',':','-.']
+kinds = list(cluster_center.iloc[:, 0])
+# Since the radar chart needs to ensure data closure, add L columns and convert them to np.ndarray
+cluster_center = pd.concat([cluster_center, cluster_center[['IN']]], axis=1)  

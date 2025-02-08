@@ -26,6 +26,7 @@ print('The category label of each sample is：\n',kmeans_labels)
 r1 = pd.Series(kmeans_model.labels_).value_counts()  # Count the number of samples of different categories
 print('The final number of each category is：\n',r1)
 
+
 # src/Output_clustering_results
 cluster_center = pd.DataFrame(kmeans_model.cluster_centers_,\
              columns = ['IN','CR','AC','CA'])   
@@ -41,3 +42,10 @@ lstype = ['-','--',':','-.']
 kinds = list(cluster_center.iloc[:, 0])
 # Since the radar chart needs to ensure data closure, add L columns and convert them to np.ndarray
 cluster_center = pd.concat([cluster_center, cluster_center[['IN']]], axis=1)  
+
+# src/visualization.py
+import matplotlib.pyplot as plt
+import seaborn as sns
+#Draw a radar chart of customer segments
+def plot_radar_chart(cluster_centers):
+    plt.savefig('outputs/visualization/radar_chart.png')
